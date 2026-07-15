@@ -35,7 +35,9 @@ opening range with volume confirmation, in either direction. See
 
 1. In TradingView, open **Pine Editor**, paste the contents of
    `ORB_Breakout_Alert.pine`, and click **Add to chart**.
-2. Use an intraday timeframe of 30 minutes or less (1m, 5m, or 15m recommended).
+2. Use an intraday timeframe of 30 minutes or less — 5m or 15m recommended.
+   The script raises an error on any higher timeframe (or daily+), since the
+   09:30–10:00 opening range can't be built from whole bars there.
 3. To create alerts: **Alerts → Create Alert**, set *Condition* to
    **ORB 30m → ORB Breakout Alert (Long)** or
    **ORB 30m → ORB Breakdown Alert (Short)**, and set the frequency to
