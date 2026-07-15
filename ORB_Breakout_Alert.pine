@@ -125,7 +125,7 @@ plotshape(breakdownBar,
      size     = size.small)
 
 // Background highlight while a signal's conditions are met
-bgcolor(longSignal  ? color.new(color.green, 85) : shortSignal ? color.new(color.red, 85) : na,
+bgcolor(longSignal  ? color.new(color.green, 70) : shortSignal ? color.new(color.red, 70) : na,
      title = "Signal Background")
 
 // ============================== Alerts ==============================
