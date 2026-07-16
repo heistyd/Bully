@@ -5,8 +5,8 @@
 // LONG / breakout signal fires when ALL of the following are true:
 //   1. Price wicks above the 30-min opening range high (09:30–10:00) —
 //      triggers intrabar on the high, not on bar close, for faster signals.
-//   2. Current bar volume >= the configured multiple of the opening range's
-//      average bar volume (default 1.0x, adjustable).
+//   2. Current bar volume >= the configured multiple of the rolling average
+//      volume of the last N bars (default 1.0x of a 20-bar average).
 //   3. Price is above the session VWAP.
 //   4. Time is within the breakout window (default 10:00–11:30, adjustable).
 //
@@ -35,7 +35,8 @@ if not timeframe.isintraday or timeframe.in_seconds() > 30 * 60
 
 // ============================== Inputs ==============================
 tz               = input.string("America/New_York", "Session timezone (IANA name only, e.g. America/New_York)")
-volMult          = input.float(1.0, "Volume multiple vs. OR average", minval = 0.1, step = 0.1)
+volMult          = input.float(1.0, "Volume multiple vs. rolling average", minval = 0.1, step = 0.1)
+volLookback      = input.int(20, "Rolling average lookback (bars)", minval = 1)
 breakoutSession  = input.string("1000-1130", "Breakout window, HHMM-HHMM (e.g. 1000-1230)")
 
 // Fixed session windows (HHMM-HHMM, interpreted in `tz`)
@@ -49,26 +50,20 @@ inWindow = not na(time(timeframe.period, breakoutSession, tz))
 inRTH    = not na(time(timeframe.period, RTH_SESSION, tz))
 
 // ====================== Opening range tracking ======================
-var float orHigh   = na   // highest high of the opening range
-var float orLow    = na   // lowest low of the opening range
-var float orVolSum = 0.0  // total volume traded during the opening range
-var int   orBars   = 0    // number of bars in the opening range
+var float orHigh = na   // highest high of the opening range
+var float orLow  = na   // lowest low of the opening range
+var int   orBars = 0    // number of bars seen in the opening range
 
 if inOR and not inOR[1]
     // First bar of the opening range — reset state for the new day
-    orHigh   := high
-    orLow    := low
-    orVolSum := volume
-    orBars   := 1
+    orHigh := high
+    orLow  := low
+    orBars := 1
 else if inOR
     // Still inside the opening range — keep accumulating
-    orHigh   := math.max(orHigh, high)
-    orLow    := math.min(orLow, low)
-    orVolSum += volume
-    orBars   += 1
-
-// Average per-bar volume of the opening range
-orAvgVol = orBars > 0 ? orVolSum / orBars : na
+    orHigh := math.max(orHigh, high)
+    orLow  := math.min(orLow, low)
+    orBars += 1
 
 // The range is complete once we've left the 09:30–10:00 window
 orComplete = not inOR and orBars > 0 and not na(orHigh)
@@ -78,8 +73,16 @@ sessionVwap = ta.vwap(hlc3)  // anchors/resets at the start of each session
 
 // ============================ Conditions ============================
 // Shared conditions
-volumeSurge      = not na(orAvgVol) and volume >= volMult * orAvgVol // volume >= configured x OR average
-inBreakoutWindow = inWindow                                          // configured breakout window
+// Volume baseline is a rolling average of recent bars (not the opening
+// range's own average) — the OR is typically the highest-volume period of
+// the day, so comparing against it makes normal breakout bars fail to
+// qualify until an outsized spike occurs, delaying the signal. Using
+// rollingAvgVol[1] (the average of the N bars *before* the current one)
+// lets a genuine breakout bar's volume be judged against normal recent
+// activity instead.
+rollingAvgVol    = ta.sma(volume, volLookback)
+volumeSurge      = not na(rollingAvgVol[1]) and volume >= volMult * rollingAvgVol[1]
+inBreakoutWindow = inWindow  // configured breakout window
 
 // Long / breakout
 // Uses the bar's high (not close) so the signal fires on the first wick
