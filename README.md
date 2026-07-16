@@ -69,5 +69,6 @@ If a move happens but no alert fires, also check the **breakout window**
 input (default 10:00–11:30, session timezone `America/New_York`). A
 breakout that occurs, or only completes all conditions, outside that
 window will not fire — this is by design, not a bug. To widen it, open the
-indicator's **Inputs** tab and adjust **Breakout window** directly on the
-chart (e.g. to 10:00–12:30) — no code change needed.
+indicator's **Inputs** tab and edit **Breakout window** directly on the
+chart — it's a plain text field in `HHMM-HHMM` format (e.g. type `1000-1230`
+to move the cutoff to 12:30) — no code change needed.
