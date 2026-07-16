@@ -58,8 +58,14 @@ indicator settings.
 ## Tuning
 
 The volume condition compares each bar to the opening range's own average
-volume. On high-volatility gap days, heavy volume during the 09:30–10:00
-range itself can raise that average enough that later bars take a while to
-clear 1.5x it, which delays the signal relative to the actual price break.
-If you see this, lower the **Volume multiple vs. OR average** input (e.g. to
-1.1–1.2) to make the volume condition easier to satisfy.
+volume. Default is **1.0x** (current bar volume must be at least the OR's
+average bar volume) — loose enough that most genuine breakouts qualify.
+Raise it (e.g. to 1.5x) if you want fewer, higher-conviction signals; on
+high-volatility gap days, heavy volume during the 09:30–10:00 range itself
+can raise that average enough that a high multiplier delays the signal well
+past the actual price break.
+
+If a move happens but no alert fires, also check the **time window**: the
+signal only evaluates between 10:00 and 11:30 in the session timezone
+(`America/New_York` by default). A breakout that occurs, or only completes
+all conditions, after 11:30 will not fire — this is by design, not a bug.

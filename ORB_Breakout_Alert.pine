@@ -34,7 +34,7 @@ if not timeframe.isintraday or timeframe.in_seconds() > 30 * 60
 
 // ============================== Inputs ==============================
 tz      = input.string("America/New_York", "Session timezone")
-volMult = input.float(1.5, "Volume multiple vs. OR average", minval = 0.1, step = 0.1)
+volMult = input.float(1.0, "Volume multiple vs. OR average", minval = 0.1, step = 0.1)
 
 // Session windows (HHMM-HHMM, interpreted in `tz`)
 OR_SESSION       = "0930-1000"  // 30-minute opening range
