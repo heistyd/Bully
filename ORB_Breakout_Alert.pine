@@ -3,13 +3,14 @@
 // 30-Minute Opening Range Breakout (ORB) — Indicator + Alerts
 // -----------------------------------------------------------
 // LONG / breakout signal fires when ALL of the following are true:
-//   1. Price breaks above the 30-min opening range high (09:30–10:00).
+//   1. Price wicks above the 30-min opening range high (09:30–10:00) —
+//      triggers intrabar on the high, not on bar close, for faster signals.
 //   2. Current bar volume >= 1.5x the average bar volume of the opening range.
 //   3. Price is above the session VWAP.
 //   4. Time is within the first 2 hours of the regular session (before 11:30).
 //
 // SHORT / breakdown signal is the mirror image:
-//   1. Price breaks below the 30-min opening range low.
+//   1. Price wicks below the 30-min opening range low (intrabar on the low).
 //   2. Same volume condition.
 //   3. Price is below the session VWAP.
 //   4. Same time window.
@@ -80,12 +81,15 @@ volumeSurge     = not na(orAvgVol) and volume >= volMult * orAvgVol // volume >=
 inFirstTwoHours = inWindow                                          // 10:00–11:30 window
 
 // Long / breakout
-breakoutAboveOR = orComplete and close > orHigh   // price above OR high
+// Uses the bar's high (not close) so the signal fires on the first wick
+// that pokes above the OR high, rather than waiting for the bar to close
+// beyond it — important on fast/gap moves where waiting for close is late.
+breakoutAboveOR = orComplete and high > orHigh    // intrabar wick above OR high
 aboveVwap       = close > sessionVwap             // price above VWAP
 longSignal      = breakoutAboveOR and volumeSurge and aboveVwap and inFirstTwoHours
 
-// Short / breakdown (mirror image)
-breakdownBelowOR = orComplete and close < orLow   // price below OR low
+// Short / breakdown (mirror image) — uses the bar's low for the same reason
+breakdownBelowOR = orComplete and low < orLow     // intrabar wick below OR low
 belowVwap        = close < sessionVwap            // price below VWAP
 shortSignal      = breakdownBelowOR and volumeSurge and belowVwap and inFirstTwoHours
 

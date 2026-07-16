@@ -8,7 +8,9 @@ opening range with volume confirmation, in either direction. See
 
 **Long / breakout:**
 
-1. **Breakout** — price closes above the high of the 09:30–10:00 opening range.
+1. **Breakout** — price wicks above the high of the 09:30–10:00 opening range
+   (triggers intrabar, on the bar's high — not on close — so the signal
+   doesn't lag behind fast moves).
 2. **Volume** — current bar volume is at least **1.5x** the average bar volume
    of the opening range (multiplier is adjustable in settings).
 3. **VWAP** — price is above the session VWAP.
@@ -17,7 +19,7 @@ opening range with volume confirmation, in either direction. See
 
 **Short / breakdown (mirror image):**
 
-1. Price closes **below** the opening range **low**.
+1. Price wicks **below** the opening range **low** (intrabar, on the bar's low).
 2. Same volume condition.
 3. Price is **below** the session VWAP.
 4. Same time window.
@@ -52,3 +54,12 @@ ORB Breakdown: {{ticker}} broke BELOW the 30-min opening range low — price {{c
 
 Session times default to `America/New_York` and can be changed in the
 indicator settings.
+
+## Tuning
+
+The volume condition compares each bar to the opening range's own average
+volume. On high-volatility gap days, heavy volume during the 09:30–10:00
+range itself can raise that average enough that later bars take a while to
+clear 1.5x it, which delays the signal relative to the actual price break.
+If you see this, lower the **Volume multiple vs. OR average** input (e.g. to
+1.1–1.2) to make the volume condition easier to satisfy.
