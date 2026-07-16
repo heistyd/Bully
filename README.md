@@ -11,11 +11,12 @@ opening range with volume confirmation, in either direction. See
 1. **Breakout** — price wicks above the high of the 09:30–10:00 opening range
    (triggers intrabar, on the bar's high — not on close — so the signal
    doesn't lag behind fast moves).
-2. **Volume** — current bar volume is at least **1.5x** the average bar volume
-   of the opening range (multiplier is adjustable in settings).
+2. **Volume** — current bar volume is at least **1.0x** the rolling average
+   bar volume of the last **20 bars** (both multiplier and lookback are
+   adjustable in settings).
 3. **VWAP** — price is above the session VWAP.
-4. **Time window** — the bar is between 10:00 and 11:30 (first 2 hours of the
-   regular session).
+4. **Time window** — the bar falls in the breakout window, default **10:00–15:30**
+   (adjustable in settings — see Tuning below).
 
 **Short / breakdown (mirror image):**
 
@@ -57,9 +58,20 @@ indicator settings.
 
 ## Tuning
 
-The volume condition compares each bar to the opening range's own average
-volume. On high-volatility gap days, heavy volume during the 09:30–10:00
-range itself can raise that average enough that later bars take a while to
-clear 1.5x it, which delays the signal relative to the actual price break.
-If you see this, lower the **Volume multiple vs. OR average** input (e.g. to
-1.1–1.2) to make the volume condition easier to satisfy.
+The volume condition compares each bar to a **rolling average** of the
+previous N bars' volume (default N = 20), not the opening range's own
+average. The opening range is typically the highest-volume period of the
+day, so comparing against it would make ordinary breakout bars fail to
+qualify until an outsized spike occurs — the rolling average avoids that,
+letting a normal breakout bar's volume be judged against recent activity
+instead. Raise the multiplier (e.g. to 1.5x) for fewer, higher-conviction
+signals, or shorten/lengthen the lookback to make the baseline more or
+less reactive.
+
+If a move happens but no alert fires, also check the **breakout window**
+input (default 10:00–15:30, session timezone `America/New_York`). A
+breakout that occurs, or only completes all conditions, outside that
+window will not fire — this is by design, not a bug. To adjust it, open the
+indicator's **Inputs** tab and edit **Breakout window** directly on the
+chart — it's a plain text field in `HHMM-HHMM` format (e.g. type `1000-1230`
+to move the cutoff to 12:30) — no code change needed.
