@@ -11,11 +11,11 @@ opening range with volume confirmation, in either direction. See
 1. **Breakout** — price wicks above the high of the 09:30–10:00 opening range
    (triggers intrabar, on the bar's high — not on close — so the signal
    doesn't lag behind fast moves).
-2. **Volume** — current bar volume is at least **1.5x** the average bar volume
+2. **Volume** — current bar volume is at least **1.0x** the average bar volume
    of the opening range (multiplier is adjustable in settings).
 3. **VWAP** — price is above the session VWAP.
-4. **Time window** — the bar is between 10:00 and 11:30 (first 2 hours of the
-   regular session).
+4. **Time window** — the bar falls in the breakout window, default **10:00–11:30**
+   (adjustable in settings — see Tuning below).
 
 **Short / breakdown (mirror image):**
 
@@ -65,7 +65,9 @@ high-volatility gap days, heavy volume during the 09:30–10:00 range itself
 can raise that average enough that a high multiplier delays the signal well
 past the actual price break.
 
-If a move happens but no alert fires, also check the **time window**: the
-signal only evaluates between 10:00 and 11:30 in the session timezone
-(`America/New_York` by default). A breakout that occurs, or only completes
-all conditions, after 11:30 will not fire — this is by design, not a bug.
+If a move happens but no alert fires, also check the **breakout window**
+input (default 10:00–11:30, session timezone `America/New_York`). A
+breakout that occurs, or only completes all conditions, outside that
+window will not fire — this is by design, not a bug. To widen it, open the
+indicator's **Inputs** tab and adjust **Breakout window** directly on the
+chart (e.g. to 10:00–12:30) — no code change needed.

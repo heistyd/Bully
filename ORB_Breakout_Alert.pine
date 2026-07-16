@@ -5,9 +5,10 @@
 // LONG / breakout signal fires when ALL of the following are true:
 //   1. Price wicks above the 30-min opening range high (09:30–10:00) —
 //      triggers intrabar on the high, not on bar close, for faster signals.
-//   2. Current bar volume >= 1.5x the average bar volume of the opening range.
+//   2. Current bar volume >= the configured multiple of the opening range's
+//      average bar volume (default 1.0x, adjustable).
 //   3. Price is above the session VWAP.
-//   4. Time is within the first 2 hours of the regular session (before 11:30).
+//   4. Time is within the breakout window (default 10:00–11:30, adjustable).
 //
 // SHORT / breakdown signal is the mirror image:
 //   1. Price wicks below the 30-min opening range low (intrabar on the low).
@@ -33,18 +34,18 @@ if not timeframe.isintraday or timeframe.in_seconds() > 30 * 60
     runtime.error("ORB 30m requires an intraday timeframe of 30 minutes or less — switch the chart to 5m or 15m.")
 
 // ============================== Inputs ==============================
-tz      = input.string("America/New_York", "Session timezone")
-volMult = input.float(1.0, "Volume multiple vs. OR average", minval = 0.1, step = 0.1)
+tz               = input.string("America/New_York", "Session timezone")
+volMult          = input.float(1.0, "Volume multiple vs. OR average", minval = 0.1, step = 0.1)
+breakoutSession  = input.session("1000-1130", "Breakout window (after the OR, before cutoff)")
 
-// Session windows (HHMM-HHMM, interpreted in `tz`)
-OR_SESSION       = "0930-1000"  // 30-minute opening range
-BREAKOUT_SESSION = "1000-1130"  // valid breakout window: after the OR, before 11:30
-RTH_SESSION      = "0930-1600"  // regular trading hours (used for drawing the OR line)
+// Fixed session windows (HHMM-HHMM, interpreted in `tz`)
+OR_SESSION  = "0930-1000"  // 30-minute opening range — fixed by strategy definition
+RTH_SESSION = "0930-1600"  // regular trading hours (used for drawing the OR line)
 
 // ======================== Session detection =========================
 // time() returns na when the bar is outside the given session.
 inOR     = not na(time(timeframe.period, OR_SESSION, tz))
-inWindow = not na(time(timeframe.period, BREAKOUT_SESSION, tz))
+inWindow = not na(time(timeframe.period, breakoutSession, tz))
 inRTH    = not na(time(timeframe.period, RTH_SESSION, tz))
 
 // ====================== Opening range tracking ======================
@@ -77,8 +78,8 @@ sessionVwap = ta.vwap(hlc3)  // anchors/resets at the start of each session
 
 // ============================ Conditions ============================
 // Shared conditions
-volumeSurge     = not na(orAvgVol) and volume >= volMult * orAvgVol // volume >= 1.5x OR average
-inFirstTwoHours = inWindow                                          // 10:00–11:30 window
+volumeSurge      = not na(orAvgVol) and volume >= volMult * orAvgVol // volume >= configured x OR average
+inBreakoutWindow = inWindow                                          // configured breakout window
 
 // Long / breakout
 // Uses the bar's high (not close) so the signal fires on the first wick
@@ -86,12 +87,12 @@ inFirstTwoHours = inWindow                                          // 10:00–1
 // beyond it — important on fast/gap moves where waiting for close is late.
 breakoutAboveOR = orComplete and high > orHigh    // intrabar wick above OR high
 aboveVwap       = close > sessionVwap             // price above VWAP
-longSignal      = breakoutAboveOR and volumeSurge and aboveVwap and inFirstTwoHours
+longSignal      = breakoutAboveOR and volumeSurge and aboveVwap and inBreakoutWindow
 
 // Short / breakdown (mirror image) — uses the bar's low for the same reason
 breakdownBelowOR = orComplete and low < orLow     // intrabar wick below OR low
 belowVwap        = close < sessionVwap            // price below VWAP
-shortSignal      = breakdownBelowOR and volumeSurge and belowVwap and inFirstTwoHours
+shortSignal      = breakdownBelowOR and volumeSurge and belowVwap and inBreakoutWindow
 
 // First bar on which each full signal appears (used for the triangle markers,
 // so consecutive qualifying bars don't stack repeated shapes)
