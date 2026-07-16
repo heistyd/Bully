@@ -15,7 +15,7 @@ opening range with volume confirmation, in either direction. See
    bar volume of the last **20 bars** (both multiplier and lookback are
    adjustable in settings).
 3. **VWAP** — price is above the session VWAP.
-4. **Time window** — the bar falls in the breakout window, default **10:00–11:30**
+4. **Time window** — the bar falls in the breakout window, default **10:00–15:30**
    (adjustable in settings — see Tuning below).
 
 **Short / breakdown (mirror image):**
@@ -69,9 +69,9 @@ signals, or shorten/lengthen the lookback to make the baseline more or
 less reactive.
 
 If a move happens but no alert fires, also check the **breakout window**
-input (default 10:00–11:30, session timezone `America/New_York`). A
+input (default 10:00–15:30, session timezone `America/New_York`). A
 breakout that occurs, or only completes all conditions, outside that
-window will not fire — this is by design, not a bug. To widen it, open the
+window will not fire — this is by design, not a bug. To adjust it, open the
 indicator's **Inputs** tab and edit **Breakout window** directly on the
 chart — it's a plain text field in `HHMM-HHMM` format (e.g. type `1000-1230`
 to move the cutoff to 12:30) — no code change needed.

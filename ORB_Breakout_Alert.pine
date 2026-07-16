@@ -8,7 +8,7 @@
 //   2. Current bar volume >= the configured multiple of the rolling average
 //      volume of the last N bars (default 1.0x of a 20-bar average).
 //   3. Price is above the session VWAP.
-//   4. Time is within the breakout window (default 10:00–11:30, adjustable).
+//   4. Time is within the breakout window (default 10:00–15:30, adjustable).
 //
 // SHORT / breakdown signal is the mirror image:
 //   1. Price wicks below the 30-min opening range low (intrabar on the low).
@@ -37,7 +37,7 @@ if not timeframe.isintraday or timeframe.in_seconds() > 30 * 60
 tz               = input.string("America/New_York", "Session timezone (IANA name only, e.g. America/New_York)")
 volMult          = input.float(1.0, "Volume multiple vs. rolling average", minval = 0.1, step = 0.1)
 volLookback      = input.int(20, "Rolling average lookback (bars)", minval = 1)
-breakoutSession  = input.string("1000-1130", "Breakout window, HHMM-HHMM (e.g. 1000-1230)")
+breakoutSession  = input.string("1000-1530", "Breakout window, HHMM-HHMM (e.g. 1000-1230)")
 
 // Fixed session windows (HHMM-HHMM, interpreted in `tz`)
 OR_SESSION  = "0930-1000"  // 30-minute opening range — fixed by strategy definition
